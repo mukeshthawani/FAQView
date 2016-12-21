@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.version      = "0.1.0"
   s.summary      = "An easy to use FAQ view for iOS written in Swift."
   s.homepage     = "https://github.com/mukeshthawani/FAQView"
-  s.license      = { :type => "MIT", :file => "LICENSE" }
+  s.license      = "MIT"
   s.author             = { "Mukesh Thawani" => "mukesh9039@gmail.com" }
   s.social_media_url   = "http://twitter.com/MukeshThawani"
   s.source       = { :git => "https://github.com/mukeshthawani/FAQView.git", :tag => "#{s.version}" }
