@@ -11,6 +11,6 @@ Pod::Spec.new do |s|
   s.social_media_url   = "http://twitter.com/MukeshThawani"
   s.source       = { :git => "https://github.com/mukeshthawani/FAQView.git", :tag => "#{s.version}" }
   s.framework  = "UIKit"
-  s.source_files = "FAQView/**/*.{swift}"
+  s.source_files = "Source/*.swift"
   s.requires_arc = true
 end
