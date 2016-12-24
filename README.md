@@ -8,9 +8,9 @@
 <br>
 
 <img
-src='https://raw.githubusercontent.com/mukeshthawani/FAQView/master/Demo/graphics/screenshot_1.png' width='450' alt='FAQView'>
+src='https://raw.githubusercontent.com/mukeshthawani/FAQView/master/Demo/graphics/screenshot_1.png' width='600' alt='FAQView'>
 <img
-src='https://raw.githubusercontent.com/mukeshthawani/FAQView/master/Demo/graphics/screenshot_2.png' width='450' alt='FAQView'>
+src='https://raw.githubusercontent.com/mukeshthawani/FAQView/master/Demo/graphics/screenshot_2.png' width='600' alt='FAQView'>
 
 ## Setup with CocoaPods
 
