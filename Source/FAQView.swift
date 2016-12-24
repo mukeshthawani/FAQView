@@ -167,7 +167,7 @@ public class FAQView: UIView {
       expandedCells.remove(at: index!)
       cell.answerLabel.text = ""
       cell.answerLabelBottom.constant = 0
-      cell.arrow = .Right
+      cell.arrow = .Down
     } else {
       expandedCells.append(section)
       cell.answerLabel.text = currentItem.answer
@@ -177,7 +177,7 @@ public class FAQView: UIView {
       })
       
       cell.answerLabelBottom.constant = 20
-      cell.arrow = .Down
+      cell.arrow = .Up
     }
     tableView.beginUpdates()
     tableView.endUpdates()
@@ -271,9 +271,9 @@ class FAQViewCell: UITableViewCell {
   
   var arrow: Arrow! {
     didSet {
-      if arrow == .Down {
+      if arrow == .Up {
         UIView.animate(withDuration: 0.5, animations: {
-          self.indicatorImageView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI/2))
+          self.indicatorImageView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
         })
       } else {
         UIView.animate(withDuration: 0.5, animations: {
@@ -302,7 +302,7 @@ class FAQViewCell: UITableViewCell {
     self.answerLabel.textColor = configuration.answerTextColor
     self.questionLabel.font = configuration.questionTextFont
     self.answerLabel.font = configuration.answerTextFont
-    let indicatorImage = UIImage(named: "RightArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
+    let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
     self.indicatorImageView.image = indicatorImage
     self.indicatorImageView.contentMode = .scaleAspectFit
     self.containerView.addSubview(indicatorImageView)
@@ -310,12 +310,6 @@ class FAQViewCell: UITableViewCell {
     addSubview(answerLabel)
     addSubview(containerView)
     addLabelConstraints()
-  }
-  
-  func rotateImage() {
-    UIView.animate(withDuration: 0.5, animations: {
-      self.indicatorImageView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI/2))
-    })
   }
   
   private func addLabelConstraints() {
@@ -349,6 +343,6 @@ class FAQViewCell: UITableViewCell {
 }
 
 enum Arrow: String {
-  case Right
+  case Up
   case Down
 }
