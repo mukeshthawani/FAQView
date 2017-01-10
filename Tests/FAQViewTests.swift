@@ -42,4 +42,13 @@ class FAQViewTests: XCTestCase {
     XCTAssertEqual(titleLabel?.font, UIFont.systemFont(ofSize: 20))
   }
   
+  func test_ViewBackgroundColor_WhenSetToDefault() {
+    XCTAssertEqual(faqView.backgroundColor, faqView.configuration.viewBackgroundColor)
+  }
+  
+  func test_ViewBackgroundColor_WhenCustomized() {
+    faqView.viewBackgroundColor = UIColor.blue
+    XCTAssertEqual(faqView.backgroundColor, UIColor.blue)
+  }
+  
 }
