@@ -15,8 +15,6 @@ public class FAQView: UIView {
   
   public var items: [FAQItem]
   
-  public var titleLabelText: String
-  
   var expandedCells: [Int]!
   
   public var questionTextColor: UIColor!  {
@@ -55,21 +53,33 @@ public class FAQView: UIView {
     }
   }
   
-  public var titleLabelColor: UIColor! {
+  public var titleLabelTextColor: UIColor! {
     get {
       return configuration.titleTextColor
     }
     set(value) {
       configuration.titleTextColor = value
+      titleLabel.textColor = configuration.titleTextColor
     }
   }
   
-  public var titleLabelFont: UIFont! {
+  public var titleLabelTextFont: UIFont! {
     get {
       return configuration.titleTextFont
     }
     set(value) {
       configuration.titleTextFont = value
+      titleLabel.font = configuration.titleTextFont
+    }
+  }
+  
+  public var titleLabelBackgroundColor: UIColor! {
+    get {
+      return configuration.titleLabelBackgroundColor
+    }
+    set(value) {
+      configuration.titleLabelBackgroundColor = value
+      titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
     }
   }
   
@@ -79,6 +89,7 @@ public class FAQView: UIView {
     }
     set(value) {
       configuration.viewBackgroundColor = value
+      self.backgroundColor = configuration.viewBackgroundColor
     }
   }
   
@@ -104,7 +115,6 @@ public class FAQView: UIView {
   
   public init(frame: CGRect,title: String = "Top Queries", items: [FAQItem]) {
     self.items = items
-    self.titleLabelText = title
     super.init(frame: frame)
     self.tableView = UITableView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), style: .grouped)
     self.tableView.translatesAutoresizingMaskIntoConstraints = false
@@ -119,7 +129,7 @@ public class FAQView: UIView {
     self.tableView.tableFooterView = UIView()
     self.titleLabel = UILabel()
     self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
-    self.titleLabel.text = titleLabelText
+    self.titleLabel.text = title
     self.titleLabel.numberOfLines = 0
     self.titleLabel.textAlignment = .center
     self.titleLabel.textColor = configuration.titleTextColor
@@ -241,6 +251,7 @@ public class FAQConfiguration {
   public var viewBackgroundColor: UIColor?
   public var cellBackgroundColor: UIColor?
   public var separatorColor: UIColor?
+  public var titleLabelBackgroundColor: UIColor?
   
   init() {
     defaultValue()
@@ -253,6 +264,7 @@ public class FAQConfiguration {
     self.answerTextFont = UIFont(name: "HelveticaNeue-Light", size: 15)
     self.titleTextColor = UIColor.black
     self.titleTextFont = UIFont(name: "HelveticaNeue-Light", size: 20)
+    self.titleLabelBackgroundColor = UIColor.clear
     self.viewBackgroundColor =  UIColor(colorLiteralRed: 210/255, green: 210/255, blue: 210/255, alpha: 1)
     self.cellBackgroundColor = UIColor.white
     self.separatorColor = UIColor(colorLiteralRed: 210/255, green: 210/255, blue: 210/255, alpha: 1)
