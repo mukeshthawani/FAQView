@@ -134,7 +134,7 @@ public class FAQView: UIView {
     self.titleLabel.textAlignment = .center
     self.titleLabel.textColor = configuration.titleTextColor
     self.titleLabel.font = configuration.titleTextFont
-    self.titleLabel.backgroundColor = configuration.viewBackgroundColor
+    self.titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
     self.backgroundColor = configuration.viewBackgroundColor
     self.tableView.separatorStyle = .none
     self.addSubview(tableView)
