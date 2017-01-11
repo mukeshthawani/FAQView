@@ -118,7 +118,6 @@
 				8B5512F61E057812009B30E9 /* Supporting files */,
 				8B32D4E41DD779B50042BEF9 /* FAQView.swift */,
 			);
-			name = Source;
 			path = Source;
 			sourceTree = "<group>";
 		};
@@ -128,7 +127,6 @@
 				8B32D4D61DD777F70042BEF9 /* FAQViewTests.swift */,
 				8B32D4D81DD777F70042BEF9 /* Info.plist */,
 			);
-			name = Tests;
 			path = Tests;
 			sourceTree = "<group>";
 		};
@@ -140,7 +138,6 @@
 				8B32D4F11DD8DCBC0042BEF9 /* AppDelegate.swift */,
 				8B32D4F31DD8DCBC0042BEF9 /* ViewController.swift */,
 			);
-			name = Demo;
 			path = Demo;
 			sourceTree = "<group>";
 		};
@@ -160,7 +157,6 @@
 				8B32D4CB1DD777F60042BEF9 /* FAQView.h */,
 				8B32D4CC1DD777F60042BEF9 /* Info.plist */,
 			);
-			name = "Supporting files";
 			path = "Supporting files";
 			sourceTree = "<group>";
 		};
@@ -172,7 +168,6 @@
 				8B32D4FA1DD8DCBC0042BEF9 /* LaunchScreen.storyboard */,
 				8B32D4F51DD8DCBC0042BEF9 /* Main.storyboard */,
 			);
-			name = "Supporting files";
 			path = "Supporting files";
 			sourceTree = "<group>";
 		};
@@ -274,7 +269,7 @@
 					8B32D4C71DD777F60042BEF9 = {
 						CreatedOnToolsVersion = 8.0;
 						LastSwiftMigration = 0800;
-						ProvisioningStyle = Automatic;
+						ProvisioningStyle = Manual;
 					};
 					8B32D4D01DD777F70042BEF9 = {
 						CreatedOnToolsVersion = 8.0;
@@ -524,6 +519,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -547,6 +543,7 @@
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_IDENTITY = "";
 				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = "";
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
