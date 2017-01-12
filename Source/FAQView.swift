@@ -112,6 +112,7 @@ public class FAQView: UIView {
   }
   
   var configuration = FAQConfiguration()
+  var heightAtIndexPath = NSMutableDictionary()
   
   public init(frame: CGRect,title: String = "Top Queries", items: [FAQItem]) {
     self.items = items
@@ -125,7 +126,6 @@ public class FAQView: UIView {
     self.tableView.delegate = self
     self.expandedCells = []
     self.tableView.estimatedRowHeight = 50
-    self.tableView.rowHeight = UITableViewAutomaticDimension
     self.tableView.tableFooterView = UIView()
     self.titleLabel = UILabel()
     self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -170,23 +170,31 @@ public class FAQView: UIView {
   }
   
   func updateSection(_ section: Int) {
-    guard let cell = tableView.cellForRow(at: IndexPath(row: 0, section: section)) as? FAQViewCell else { return }
-    let currentItem = items[section]
     if expandedCells.contains(section) {
       let index = expandedCells.index(of: section)
       expandedCells.remove(at: index!)
-      cell.collapse(animated: true)
     } else {
       expandedCells.append(section)
-      cell.expand(withAnswer: currentItem.answer, animated: true)
     }
-    tableView.beginUpdates()
-    tableView.endUpdates()
+    tableView.reloadSections(IndexSet(integer: section), with: .fade)
+    tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
   }
-  
-  }
+}
 
 extension FAQView: UITableViewDelegate, UITableViewDataSource {
+  public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+    let height = self.heightAtIndexPath.object(forKey: indexPath)
+    if ((height) != nil) {
+      return CGFloat(height as! CGFloat)
+    } else {
+      return UITableViewAutomaticDimension
+    }
+  }
+  
+  public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    let height = cell.frame.size.height
+    self.heightAtIndexPath.setObject(height, forKey: indexPath as NSCopying)
+  }
   
   public func numberOfSections(in tableView: UITableView) -> Int {
     return items.count
