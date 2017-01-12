@@ -215,6 +215,8 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
     cell.questionLabel.isUserInteractionEnabled = true
     if expandedCells.contains(indexPath.section) {
       cell.expand(withAnswer: currentItem.answer, animated: false)
+    } else {
+      cell.collapse(animated: false)
     }
     return cell
   }
