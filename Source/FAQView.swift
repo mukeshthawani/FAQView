@@ -213,6 +213,12 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
     let gestureRecog = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
     cell.questionLabel.addGestureRecognizer(gestureRecog)
     cell.questionLabel.isUserInteractionEnabled = true
+    
+    cell.indicatorImageView.tag = indexPath.section
+    let gestureRecogizerForImage = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
+    cell.indicatorImageView.addGestureRecognizer(gestureRecogizerForImage)
+    cell.indicatorImageView.isUserInteractionEnabled = true
+    
     if expandedCells.contains(indexPath.section) {
       cell.expand(withAnswer: currentItem.answer, animated: false)
     } else {
