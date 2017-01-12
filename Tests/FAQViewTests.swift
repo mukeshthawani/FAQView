@@ -57,8 +57,8 @@ class FAQViewTests: XCTestCase {
     let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
     let questionLabel = faqViewCell.questionLabel
     let configuration = faqView.configuration
-    XCTAssertEqual(questionLabel?.textColor, configuration.questionTextColor)
-    XCTAssertEqual(questionLabel?.font, configuration.questionTextFont)
+    XCTAssertEqual(questionLabel.textColor, configuration.questionTextColor)
+    XCTAssertEqual(questionLabel.font, configuration.questionTextFont)
   }
   
   func test_QuestionLabelProperties_WhenCustomized() {
@@ -66,16 +66,16 @@ class FAQViewTests: XCTestCase {
     faqView.questionTextFont = systemFont
     let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
     let questionLabel = faqViewCell.questionLabel
-    XCTAssertEqual(questionLabel?.textColor, blueColor)
-    XCTAssertEqual(questionLabel?.font, systemFont)
+    XCTAssertEqual(questionLabel.textColor, blueColor)
+    XCTAssertEqual(questionLabel.font, systemFont)
   }
   
   func test_AnswerLabelProperties_WhenSetToDefault() {
     let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
     let answerLabel = faqViewCell.answerLabel
     let configuration = faqView.configuration
-    XCTAssertEqual(answerLabel?.textColor, configuration.answerTextColor)
-    XCTAssertEqual(answerLabel?.font, configuration.answerTextFont)
+    XCTAssertEqual(answerLabel.textColor, configuration.answerTextColor)
+    XCTAssertEqual(answerLabel.font, configuration.answerTextFont)
   }
   
   func test_AnswerLabelProperties_WhenCustomized() {
@@ -83,8 +83,8 @@ class FAQViewTests: XCTestCase {
     faqView.answerTextFont = systemFont
     let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
     let answerLabel = faqViewCell.answerLabel
-    XCTAssertEqual(answerLabel?.textColor, blueColor)
-    XCTAssertEqual(answerLabel?.font, systemFont)
+    XCTAssertEqual(answerLabel.textColor, blueColor)
+    XCTAssertEqual(answerLabel.font, systemFont)
   }
   
 }
