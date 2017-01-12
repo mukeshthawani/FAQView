@@ -205,7 +205,8 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
   }
   
   public func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-    let cell = FAQViewCell(style: .default, reuseIdentifier: "cell", configuration: configuration)
+    let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! FAQViewCell
+    cell.configuration = configuration
     let currentItem = items[indexPath.section]
     cell.questionLabel.text = currentItem.question
     cell.questionLabel.tag = indexPath.section
@@ -277,32 +278,26 @@ public class FAQConfiguration {
 
 class FAQViewCell: UITableViewCell {
   
-  var configuration: FAQConfiguration!
-  var questionLabel: UILabel!
-  var answerLabel: UILabel!
-  var indicatorImageView: UIImageView!
-  var answerLabelBottom: NSLayoutConstraint!
-  private var containerView: UIView!
+  var questionLabel = UILabel()
+  var answerLabel = UILabel()
+  var indicatorImageView = UIImageView()
+  var answerLabelBottom = NSLayoutConstraint()
+  private var containerView =  UIView()
   
-  init(style: UITableViewCellStyle, reuseIdentifier: String?, configuration: FAQConfiguration) {
+  var configuration: FAQConfiguration! {
+    didSet {
+      configure(configuration: configuration)
+    }
+  }
+  
+  override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    
-    self.backgroundColor = configuration.cellBackgroundColor
-    self.questionLabel = UILabel()
-    self.answerLabel = UILabel()
-    self.indicatorImageView = UIImageView()
-    self.containerView = UIView()
-    self.answerLabelBottom = NSLayoutConstraint()
     self.questionLabel.translatesAutoresizingMaskIntoConstraints = false
     self.answerLabel.translatesAutoresizingMaskIntoConstraints = false
     self.indicatorImageView.translatesAutoresizingMaskIntoConstraints = false
     self.containerView.translatesAutoresizingMaskIntoConstraints = false
     self.questionLabel.numberOfLines = 0
     self.answerLabel.numberOfLines = 0
-    self.questionLabel.textColor = configuration.questionTextColor
-    self.answerLabel.textColor = configuration.answerTextColor
-    self.questionLabel.font = configuration.questionTextFont
-    self.answerLabel.font = configuration.answerTextFont
     let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
     self.indicatorImageView.image = indicatorImage
     self.indicatorImageView.contentMode = .scaleAspectFit
@@ -340,6 +335,14 @@ class FAQViewCell: UITableViewCell {
   
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
+  }
+  
+  func configure(configuration: FAQConfiguration) {
+    self.backgroundColor = configuration.cellBackgroundColor
+    self.questionLabel.textColor = configuration.questionTextColor
+    self.answerLabel.textColor = configuration.answerTextColor
+    self.questionLabel.font = configuration.questionTextFont
+    self.answerLabel.font = configuration.answerTextFont
   }
   
   func expand(withAnswer answer: String, animated: Bool) {
