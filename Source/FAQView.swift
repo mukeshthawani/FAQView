@@ -187,6 +187,10 @@ public class FAQView: UIView {
       : #selector(FAQView.handleQuestionLabelTap(_:)))
     cell.questionLabel.addGestureRecognizer(gestureRecog)
     cell.questionLabel.isUserInteractionEnabled = true
+    cell.indicatorImageView.tag = indexPath.section
+    let gestureRecogizerForImage = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
+    cell.indicatorImageView.addGestureRecognizer(gestureRecogizerForImage)
+    cell.indicatorImageView.isUserInteractionEnabled = true
     let cellOperation = expandedCells[indexPath.section]
     switch cellOperation {
     case .Default:
