@@ -112,6 +112,7 @@ public class FAQView: UIView {
   }
   
   var configuration = FAQConfiguration()
+  var heightAtIndexPath = NSMutableDictionary()
   
   public init(frame: CGRect,title: String = "Top Queries", items: [FAQItem]) {
     self.items = items
@@ -125,7 +126,6 @@ public class FAQView: UIView {
     self.tableView.delegate = self
     self.expandedCells = []
     self.tableView.estimatedRowHeight = 50
-    self.tableView.rowHeight = UITableViewAutomaticDimension
     self.tableView.tableFooterView = UIView()
     self.titleLabel = UILabel()
     self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
@@ -170,31 +170,31 @@ public class FAQView: UIView {
   }
   
   func updateSection(_ section: Int) {
-    guard let cell = tableView.cellForRow(at: IndexPath(row: 0, section: section)) as? FAQViewCell else { return }
-    let currentItem = items[section]
     if expandedCells.contains(section) {
       let index = expandedCells.index(of: section)
       expandedCells.remove(at: index!)
-      cell.answerLabel.text = ""
-      cell.answerLabelBottom.constant = 0
-      cell.arrow = .Down
     } else {
       expandedCells.append(section)
-      cell.answerLabel.text = currentItem.answer
-      cell.answerLabel.alpha = 0
-      UIView.animate(withDuration: 0.5, animations: {
-        cell.answerLabel.alpha = 1
-      })
-      
-      cell.answerLabelBottom.constant = 20
-      cell.arrow = .Up
     }
-    tableView.beginUpdates()
-    tableView.endUpdates()
+    tableView.reloadSections(IndexSet(integer: section), with: .fade)
+    tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
   }
 }
 
 extension FAQView: UITableViewDelegate, UITableViewDataSource {
+  public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
+    let height = self.heightAtIndexPath.object(forKey: indexPath)
+    if ((height) != nil) {
+      return CGFloat(height as! CGFloat)
+    } else {
+      return UITableViewAutomaticDimension
+    }
+  }
+  
+  public func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+    let height = cell.frame.size.height
+    self.heightAtIndexPath.setObject(height, forKey: indexPath as NSCopying)
+  }
   
   public func numberOfSections(in tableView: UITableView) -> Int {
     return items.count
@@ -212,6 +212,9 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
     let gestureRecog = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
     cell.questionLabel.addGestureRecognizer(gestureRecog)
     cell.questionLabel.isUserInteractionEnabled = true
+    if expandedCells.contains(indexPath.section) {
+      cell.expand(withAnswer: currentItem.answer, animated: false)
+    }
     return cell
   }
   
@@ -281,20 +284,6 @@ class FAQViewCell: UITableViewCell {
   var answerLabelBottom: NSLayoutConstraint!
   private var containerView: UIView!
   
-  var arrow: Arrow! {
-    didSet {
-      if arrow == .Up {
-        UIView.animate(withDuration: 0.5, animations: {
-          self.indicatorImageView.transform = CGAffineTransform(rotationAngle: CGFloat(M_PI))
-        })
-      } else {
-        UIView.animate(withDuration: 0.5, animations: {
-          self.indicatorImageView.transform = CGAffineTransform(rotationAngle: CGFloat(0))
-        })
-      }
-    }
-  }
-  
   init(style: UITableViewCellStyle, reuseIdentifier: String?, configuration: FAQConfiguration) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     
@@ -352,9 +341,49 @@ class FAQViewCell: UITableViewCell {
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
+  
+  func expand(withAnswer answer: String, animated: Bool) {
+    self.answerLabel.text = answer
+    if animated {
+      self.answerLabel.alpha = 0
+      UIView.animate(withDuration: 0.5, animations: {
+        self.answerLabel.alpha = 1
+      })
+    }
+    self.answerLabelBottom.constant = 20
+    self.update(arrow: .Up, animated: animated)
+  }
+  
+  
+  func collapse(animated: Bool) {
+    self.answerLabel.text = ""
+    self.answerLabelBottom.constant = 0
+    self.update(arrow: .Down, animated: animated)
+  }
+  
+  func update(arrow: Arrow, animated: Bool) {
+    switch arrow {
+    case .Up:
+      self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: animated)
+    case .Down:
+      self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: animated)
+    }
+  }
 }
 
 enum Arrow: String {
   case Up
   case Down
+}
+
+extension UIImageView {
+  func rotate(withAngle angle: CGFloat, animated: Bool) {
+    if animated {
+      UIView.animate(withDuration: 0.5, animations: {
+        self.transform = CGAffineTransform(rotationAngle: angle)
+      })
+    } else {
+      self.transform = CGAffineTransform(rotationAngle: angle)
+    }
+  }
 }
