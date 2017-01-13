@@ -5,7 +5,6 @@
 //  Created by Mukesh Thawani on 12/11/16.
 //  Copyright © 2016 Mukesh Thawani. All rights reserved.
 //
-
 import Foundation
 
 public class FAQView: UIView {
@@ -108,6 +107,15 @@ public class FAQView: UIView {
     }
     set(value) {
       configuration.separatorColor = value
+    }
+  }
+  
+  public var dataDetectorTypes: UIDataDetectorTypes? {
+    get {
+      return configuration.dataDetectorTypes
+    }
+    set(value) {
+      configuration.dataDetectorTypes = value
     }
   }
   
@@ -264,6 +272,7 @@ public class FAQConfiguration {
   public var cellBackgroundColor: UIColor?
   public var separatorColor: UIColor?
   public var titleLabelBackgroundColor: UIColor?
+  public var dataDetectorTypes: UIDataDetectorTypes?
   
   init() {
     defaultValue()
@@ -287,7 +296,7 @@ public class FAQConfiguration {
 class FAQViewCell: UITableViewCell {
   
   var questionLabel = UILabel()
-  var answerLabel = UILabel()
+  var answerTextView = UITextView()
   var indicatorImageView = UIImageView()
   var answerLabelBottom = NSLayoutConstraint()
   private var containerView =  UIView()
@@ -301,17 +310,22 @@ class FAQViewCell: UITableViewCell {
   override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     self.questionLabel.translatesAutoresizingMaskIntoConstraints = false
-    self.answerLabel.translatesAutoresizingMaskIntoConstraints = false
+    self.answerTextView.translatesAutoresizingMaskIntoConstraints = false
     self.indicatorImageView.translatesAutoresizingMaskIntoConstraints = false
     self.containerView.translatesAutoresizingMaskIntoConstraints = false
     self.questionLabel.numberOfLines = 0
-    self.answerLabel.numberOfLines = 0
+    answerTextView.isScrollEnabled = false
+    answerTextView.backgroundColor = UIColor.clear
+    let insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    answerTextView.textContainerInset = insets
+    answerTextView.isEditable = false
+    answerTextView.dataDetectorTypes = []
     let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
     self.indicatorImageView.image = indicatorImage
     self.indicatorImageView.contentMode = .scaleAspectFit
     self.containerView.addSubview(indicatorImageView)
     contentView.addSubview(questionLabel)
-    contentView.addSubview(answerLabel)
+    contentView.addSubview(answerTextView)
     contentView.addSubview(containerView)
     addLabelConstraints()
   }
@@ -321,10 +335,10 @@ class FAQViewCell: UITableViewCell {
     let questionLabelLeading = NSLayoutConstraint(item: questionLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
     let questionLabelTop = NSLayoutConstraint(item: questionLabel, attribute: .top, relatedBy: .equal, toItem: contentView, attribute: .top, multiplier: 1, constant: 10)
     
-    let answerLabelTrailing = NSLayoutConstraint(item: answerLabel, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
-    let answerLabelLeading = NSLayoutConstraint(item: answerLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
-    let answerLabelTop = NSLayoutConstraint(item: answerLabel, attribute: .top, relatedBy: .equal, toItem: questionLabel, attribute: .bottom, multiplier: 1, constant: 10)
-    answerLabelBottom = NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: answerLabel, attribute: .bottom, multiplier: 1, constant: 0)
+    let answerLabelTrailing = NSLayoutConstraint(item: answerTextView, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
+    let answerLabelLeading = NSLayoutConstraint(item: answerTextView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: -5)
+    let answerLabelTop = NSLayoutConstraint(item: answerTextView, attribute: .top, relatedBy: .equal, toItem: questionLabel, attribute: .bottom, multiplier: 1, constant: 10)
+    answerLabelBottom = NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: answerTextView, attribute: .bottom, multiplier: 1, constant: 0)
     
     let indicatorHorizontalCenter = NSLayoutConstraint(item: indicatorImageView, attribute: .centerX, relatedBy: .equal, toItem: containerView, attribute: .centerX, multiplier: 1, constant: 0)
     let indicatorVerticalCenter = NSLayoutConstraint(item: indicatorImageView, attribute: .centerY, relatedBy: .equal, toItem: containerView, attribute: .centerY, multiplier: 1, constant: 0)
@@ -348,17 +362,21 @@ class FAQViewCell: UITableViewCell {
   func configure(configuration: FAQConfiguration) {
     self.backgroundColor = configuration.cellBackgroundColor
     self.questionLabel.textColor = configuration.questionTextColor
-    self.answerLabel.textColor = configuration.answerTextColor
+    self.answerTextView.textColor = configuration.answerTextColor
     self.questionLabel.font = configuration.questionTextFont
-    self.answerLabel.font = configuration.answerTextFont
+    self.answerTextView.font = configuration.answerTextFont
+    if let dataDetectorTypes = configuration.dataDetectorTypes {
+      self.answerTextView.dataDetectorTypes = dataDetectorTypes
+    }
   }
   
   func expand(withAnswer answer: String, animated: Bool) {
-    self.answerLabel.text = answer
+    self.answerTextView.text = answer
+    answerTextView.isHidden = false
     if animated {
-      self.answerLabel.alpha = 0
+      self.answerTextView.alpha = 0
       UIView.animate(withDuration: 0.5, animations: {
-        self.answerLabel.alpha = 1
+        self.answerTextView.alpha = 1
       })
     }
     self.answerLabelBottom.constant = 20
@@ -367,8 +385,9 @@ class FAQViewCell: UITableViewCell {
   
   
   func collapse(animated: Bool) {
-    self.answerLabel.text = ""
-    self.answerLabelBottom.constant = 0
+    self.answerTextView.text = ""
+    answerTextView.isHidden = true
+    self.answerLabelBottom.constant = -30
     self.update(arrow: .Down, animated: animated)
   }
   
