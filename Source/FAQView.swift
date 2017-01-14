@@ -318,7 +318,8 @@ class FAQViewCell: UITableViewCell {
     self.containerView.translatesAutoresizingMaskIntoConstraints = false
     self.questionLabel.numberOfLines = 0
     self.answerLabel.numberOfLines = 0
-    
+    let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
+    self.indicatorImageView.image = indicatorImage
     self.indicatorImageView.contentMode = .scaleAspectFit
     self.containerView.addSubview(indicatorImageView)
     contentView.addSubview(questionLabel)
@@ -384,8 +385,6 @@ class FAQViewCell: UITableViewCell {
   }
   
   func update(arrow: Arrow, animated: Bool) {
-    let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
-    self.indicatorImageView.image = indicatorImage
     switch arrow {
     case .Up:
       if animated {
