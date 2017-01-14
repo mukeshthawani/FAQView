@@ -419,12 +419,8 @@ enum CellOperation {
 
 extension UIImageView {
   func rotate(withAngle angle: CGFloat, animated: Bool) {
-    if animated {
-      UIView.animate(withDuration: 0.5, animations: {
+      UIView.animate(withDuration: animated ? 0.5 : 0, animations: {
         self.transform = CGAffineTransform(rotationAngle: angle)
       })
-    } else {
-      self.transform = CGAffineTransform(rotationAngle: angle)
-    }
   }
 }
