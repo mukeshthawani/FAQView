@@ -213,16 +213,23 @@ public class FAQView: UIView {
     case .Default:
       cell.collapse(animated: false)
     case .Expand:
-      cell.expand(withAnswer: currentItem.answer, animated: true)
+      if let answer = currentItem.answer {
+        cell.expand(withAnswer: answer, animated: true)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        cell.expand(withAttributedAnswer: attributedAnswer, animated: true)
+      }
       expandedCells[indexPath.section] = .Expanded
     case .Collapse:
       cell.collapse(animated: true)
       expandedCells[indexPath.section] = .Default
     case .Expanded:
-      cell.expand(withAnswer: currentItem.answer, animated: false)
+      if let answer = currentItem.answer {
+        cell.expand(withAnswer: answer, animated: false)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        cell.expand(withAttributedAnswer: attributedAnswer, animated: false)
+      }
     }
   }
-
 }
 
 extension FAQView: UITableViewDelegate, UITableViewDataSource {
@@ -439,20 +446,9 @@ class FAQViewCell: UITableViewCell {
   func update(arrow: Arrow, animated: Bool) {
     switch arrow {
     case .Up:
-      if animated {
-        // Change direction from down to up with animation
-        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: false)
-        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: true)
-      } else {
-        // Change direction from down to up without animation
-        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
-      }
+      self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: animated)
     case .Down:
-      if animated {
-        // Change direction from up to down with animation
-        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
-        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: true)
-      }
+      self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: animated)
     }
   }
 }
@@ -471,8 +467,12 @@ enum CellOperation {
 
 extension UIImageView {
   func rotate(withAngle angle: CGFloat, animated: Bool) {
-      UIView.animate(withDuration: animated ? 0.5 : 0, animations: {
+    if animated {
+      UIView.animate(withDuration: 0.5, animations: {
         self.transform = CGAffineTransform(rotationAngle: angle)
       })
+    } else {
+      self.transform = CGAffineTransform(rotationAngle: angle)
+    }
   }
 }
