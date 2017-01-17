@@ -14,7 +14,7 @@ public class FAQView: UIView {
   
   public var items: [FAQItem]
   
-  var expandedCells: [Int]!
+  var expandedCells: [CellOperation]!
   
   public var questionTextColor: UIColor!  {
     get {
@@ -154,6 +154,7 @@ public class FAQView: UIView {
     self.titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
     self.backgroundColor = configuration.viewBackgroundColor
     self.tableView.separatorStyle = .none
+    expandedCells = Array(repeating: CellOperation.Default, count: items.count)
     self.addSubview(tableView)
     self.addSubview(titleLabel)
     addConstraintsForTableViewAndTitleLabel()
@@ -187,15 +188,41 @@ public class FAQView: UIView {
   }
   
   func updateSection(_ section: Int) {
-    if expandedCells.contains(section) {
-      let index = expandedCells.index(of: section)
-      expandedCells.remove(at: index!)
+    if expandedCells[section] == .Expanded {
+      expandedCells[section] = .Collapse
     } else {
-      expandedCells.append(section)
+      expandedCells[section] = .Expand
     }
     tableView.reloadSections(IndexSet(integer: section), with: .fade)
     tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
   }
+  
+  func configureCells(cell: FAQViewCell, currentItem: FAQItem, indexPath: IndexPath) {
+    cell.questionLabel.text = currentItem.question
+    cell.questionLabel.tag = indexPath.section
+    let gestureRecog = UITapGestureRecognizer(target: self, action
+      : #selector(FAQView.handleQuestionLabelTap(_:)))
+    cell.questionLabel.addGestureRecognizer(gestureRecog)
+    cell.questionLabel.isUserInteractionEnabled = true
+    cell.indicatorImageView.tag = indexPath.section
+    let gestureRecogizerForImage = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
+    cell.indicatorImageView.addGestureRecognizer(gestureRecogizerForImage)
+    cell.indicatorImageView.isUserInteractionEnabled = true
+    let cellOperation = expandedCells[indexPath.section]
+    switch cellOperation {
+    case .Default:
+      cell.collapse(animated: false)
+    case .Expand:
+      cell.expand(withAnswer: currentItem.answer, animated: true)
+      expandedCells[indexPath.section] = .Expanded
+    case .Collapse:
+      cell.collapse(animated: true)
+      expandedCells[indexPath.section] = .Default
+    case .Expanded:
+      cell.expand(withAnswer: currentItem.answer, animated: false)
+    }
+  }
+
 }
 
 extension FAQView: UITableViewDelegate, UITableViewDataSource {
@@ -225,28 +252,7 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! FAQViewCell
     cell.configuration = configuration
     let currentItem = items[indexPath.section]
-    cell.questionLabel.text = currentItem.question
-    cell.questionLabel.tag = indexPath.section
-    let gestureRecog = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
-    cell.questionLabel.addGestureRecognizer(gestureRecog)
-    cell.questionLabel.isUserInteractionEnabled = true
-    
-    cell.indicatorImageView.tag = indexPath.section
-    let gestureRecogizerForImage = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
-    cell.indicatorImageView.addGestureRecognizer(gestureRecogizerForImage)
-    cell.indicatorImageView.isUserInteractionEnabled = true
-    
-    if expandedCells.contains(indexPath.section) {
-      if let answer = currentItem.answer {
-        cell.expand(withAnswer: answer, animated: false)
-      } else if let attributedAnswer = currentItem.attributedAnswer {
-        cell.expand(withAttributedAnswer: attributedAnswer, animated: false)
-      } else {
-        cell.expand(withAnswer: "No answer available.", animated: false)
-      }
-    } else {
-      cell.collapse(animated: false)
-    }
+    configureCells(cell: cell, currentItem: currentItem, indexPath: indexPath)
     return cell
   }
   
@@ -433,9 +439,20 @@ class FAQViewCell: UITableViewCell {
   func update(arrow: Arrow, animated: Bool) {
     switch arrow {
     case .Up:
-      self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: animated)
+      if animated {
+        // Change direction from down to up with animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: false)
+        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: true)
+      } else {
+        // Change direction from down to up without animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
+      }
     case .Down:
-      self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: animated)
+      if animated {
+        // Change direction from up to down with animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
+        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: true)
+      }
     }
   }
 }
@@ -445,14 +462,17 @@ enum Arrow: String {
   case Down
 }
 
+enum CellOperation {
+  case Default
+  case Expand
+  case Expanded
+  case Collapse
+}
+
 extension UIImageView {
   func rotate(withAngle angle: CGFloat, animated: Bool) {
-    if animated {
-      UIView.animate(withDuration: 0.5, animations: {
+      UIView.animate(withDuration: animated ? 0.5 : 0, animations: {
         self.transform = CGAffineTransform(rotationAngle: angle)
       })
-    } else {
-      self.transform = CGAffineTransform(rotationAngle: angle)
-    }
   }
 }
