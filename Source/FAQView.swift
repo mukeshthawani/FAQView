@@ -443,9 +443,20 @@ class FAQViewCell: UITableViewCell {
   func update(arrow: Arrow, animated: Bool) {
     switch arrow {
     case .up:
-      self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: animated)
+      if animated {
+        // Change direction from down to up with animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: false)
+        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: true)
+      } else {
+        // Change direction from down to up without animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
+      }
     case .down:
-      self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: animated)
+      if animated {
+        // Change direction from up to down with animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
+        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: true)
+      }
     }
   }
 }
