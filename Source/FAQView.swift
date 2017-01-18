@@ -456,7 +456,10 @@ class FAQViewCell: UITableViewCell {
         // Change direction from up to down with animation
         self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
         self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: true)
-      }
+      } else {
+        // Change direction from up to down without animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: false)
+      }    
     }
   }
 }
