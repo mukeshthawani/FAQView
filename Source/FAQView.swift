@@ -154,7 +154,7 @@ public class FAQView: UIView {
     self.titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
     self.backgroundColor = configuration.viewBackgroundColor
     self.tableView.separatorStyle = .none
-    expandedCells = Array(repeating: CellOperation.Default, count: items.count)
+    expandedCells = Array(repeating: CellOperation.collapsed, count: items.count)
     self.addSubview(tableView)
     self.addSubview(titleLabel)
     addConstraintsForTableViewAndTitleLabel()
@@ -188,10 +188,10 @@ public class FAQView: UIView {
   }
   
   func updateSection(_ section: Int) {
-    if expandedCells[section] == .Expanded {
-      expandedCells[section] = .Collapse
+    if expandedCells[section] == .expanded {
+      expandedCells[section] = .collapse
     } else {
-      expandedCells[section] = .Expand
+      expandedCells[section] = .expand
     }
     tableView.reloadSections(IndexSet(integer: section), with: .fade)
     tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
@@ -210,19 +210,19 @@ public class FAQView: UIView {
     cell.indicatorImageView.isUserInteractionEnabled = true
     let cellOperation = expandedCells[indexPath.section]
     switch cellOperation {
-    case .Default:
+    case .collapsed:
       cell.collapse(animated: false)
-    case .Expand:
+    case .expand:
       if let answer = currentItem.answer {
         cell.expand(withAnswer: answer, animated: true)
       } else if let attributedAnswer = currentItem.attributedAnswer {
         cell.expand(withAttributedAnswer: attributedAnswer, animated: true)
       }
-      expandedCells[indexPath.section] = .Expanded
-    case .Collapse:
+      expandedCells[indexPath.section] = .expanded
+    case .collapse:
       cell.collapse(animated: true)
-      expandedCells[indexPath.section] = .Default
-    case .Expanded:
+      expandedCells[indexPath.section] = .collapsed
+    case .expanded:
       if let answer = currentItem.answer {
         cell.expand(withAnswer: answer, animated: false)
       } else if let attributedAnswer = currentItem.attributedAnswer {
@@ -323,9 +323,10 @@ public class FAQConfiguration {
     self.titleTextColor = UIColor.black
     self.titleTextFont = UIFont(name: "HelveticaNeue-Light", size: 20)
     self.titleLabelBackgroundColor = UIColor.clear
-    self.viewBackgroundColor =  UIColor(colorLiteralRed: 210/255, green: 210/255, blue: 210/255, alpha: 1)
+    let colorValue: Float = 210/255
+    self.viewBackgroundColor =  UIColor(colorLiteralRed: colorValue, green: colorValue, blue: colorValue, alpha: 1)
     self.cellBackgroundColor = UIColor.white
-    self.separatorColor = UIColor(colorLiteralRed: 210/255, green: 210/255, blue: 210/255, alpha: 1)
+    self.separatorColor = UIColor(colorLiteralRed: colorValue, green: colorValue, blue: colorValue, alpha: 1)
   }
 }
 
@@ -412,19 +413,15 @@ class FAQViewCell: UITableViewCell {
   
   func expand(withAnswer answer: String, animated: Bool) {
     answerTextView.text = answer
-    answerTextView.isHidden = false
-    if animated {
-      answerTextView.alpha = 0
-      UIView.animate(withDuration: 0.5, animations: {
-        self.answerTextView.alpha = 1
-      })
-    }
-    answerTextViewBottom.constant = 20
-    update(arrow: .Up, animated: animated)
+    expand(animated: animated)
   }
   
   func expand(withAttributedAnswer attributedAnswer: NSAttributedString, animated: Bool) {
     answerTextView.attributedText = attributedAnswer
+    expand(animated: animated)
+  }
+  
+  func expand(animated: Bool) {
     answerTextView.isHidden = false
     if animated {
       answerTextView.alpha = 0
@@ -433,36 +430,36 @@ class FAQViewCell: UITableViewCell {
       })
     }
     answerTextViewBottom.constant = 20
-    update(arrow: .Up, animated: animated)
+    update(arrow: .up, animated: animated)
   }
   
   func collapse(animated: Bool) {
     answerTextView.text = ""
     answerTextView.isHidden = true
-    answerTextViewBottom.constant = -30
-    update(arrow: .Down, animated: animated)
+    answerTextViewBottom.constant = -20
+    update(arrow: .down, animated: animated)
   }
   
   func update(arrow: Arrow, animated: Bool) {
     switch arrow {
-    case .Up:
+    case .up:
       self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: animated)
-    case .Down:
+    case .down:
       self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: animated)
     }
   }
 }
 
 enum Arrow: String {
-  case Up
-  case Down
+  case up
+  case down
 }
 
 enum CellOperation {
-  case Default
-  case Expand
-  case Expanded
-  case Collapse
+  case collapsed
+  case expand
+  case expanded
+  case collapse
 }
 
 extension UIImageView {
