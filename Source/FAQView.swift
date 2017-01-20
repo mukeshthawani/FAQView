@@ -5,7 +5,6 @@
 //  Created by Mukesh Thawani on 12/11/16.
 //  Copyright © 2016 Mukesh Thawani. All rights reserved.
 //
-
 import Foundation
 
 public class FAQView: UIView {
@@ -111,6 +110,24 @@ public class FAQView: UIView {
     }
   }
   
+  public var dataDetectorTypes: UIDataDetectorTypes? {
+    get {
+      return configuration.dataDetectorTypes
+    }
+    set(value) {
+      configuration.dataDetectorTypes = value
+    }
+  }
+  
+  public var answerTintColor: UIColor! {
+    get {
+      return configuration.tintColor
+    }
+    set(value) {
+      configuration.tintColor = value
+    }
+  }
+  
   var configuration = FAQConfiguration()
   var heightAtIndexPath = NSMutableDictionary()
   
@@ -137,7 +154,7 @@ public class FAQView: UIView {
     self.titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
     self.backgroundColor = configuration.viewBackgroundColor
     self.tableView.separatorStyle = .none
-    expandedCells = Array(repeating: CellOperation.Default, count: items.count)
+    expandedCells = Array(repeating: CellOperation.collapsed, count: items.count)
     self.addSubview(tableView)
     self.addSubview(titleLabel)
     addConstraintsForTableViewAndTitleLabel()
@@ -171,10 +188,10 @@ public class FAQView: UIView {
   }
   
   func updateSection(_ section: Int) {
-    if expandedCells[section] == .Expanded {
-      expandedCells[section] = .Collapse
+    if expandedCells[section] == .expanded {
+      expandedCells[section] = .collapse
     } else {
-      expandedCells[section] = .Expand
+      expandedCells[section] = .expand
     }
     tableView.reloadSections(IndexSet(integer: section), with: .fade)
     tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
@@ -193,19 +210,26 @@ public class FAQView: UIView {
     cell.indicatorImageView.isUserInteractionEnabled = true
     let cellOperation = expandedCells[indexPath.section]
     switch cellOperation {
-    case .Default:
+    case .collapsed:
       cell.collapse(animated: false)
-    case .Expand:
-      cell.expand(withAnswer: currentItem.answer, animated: true)
-      expandedCells[indexPath.section] = .Expanded
-    case .Collapse:
+    case .expand:
+      if let answer = currentItem.answer {
+        cell.expand(withAnswer: answer, animated: true)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        cell.expand(withAttributedAnswer: attributedAnswer, animated: true)
+      }
+      expandedCells[indexPath.section] = .expanded
+    case .collapse:
       cell.collapse(animated: true)
-      expandedCells[indexPath.section] = .Default
-    case .Expanded:
-      cell.expand(withAnswer: currentItem.answer, animated: false)
+      expandedCells[indexPath.section] = .collapsed
+    case .expanded:
+      if let answer = currentItem.answer {
+        cell.expand(withAnswer: answer, animated: false)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        cell.expand(withAttributedAnswer: attributedAnswer, animated: false)
+      }
     }
   }
-
 }
 
 extension FAQView: UITableViewDelegate, UITableViewDataSource {
@@ -256,11 +280,19 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
 
 public struct FAQItem {
   public let question: String
-  public let answer: String
+  public let answer: String?
+  public let attributedAnswer: NSAttributedString?
   
   public init(question: String, answer: String) {
     self.question = question
     self.answer = answer
+    self.attributedAnswer = nil
+  }
+  
+  public init(question: String, attributedAnswer: NSAttributedString) {
+    self.question = question
+    self.attributedAnswer = attributedAnswer
+    self.answer = nil
   }
 }
 
@@ -276,6 +308,8 @@ public class FAQConfiguration {
   public var cellBackgroundColor: UIColor?
   public var separatorColor: UIColor?
   public var titleLabelBackgroundColor: UIColor?
+  public var dataDetectorTypes: UIDataDetectorTypes?
+  public var tintColor: UIColor?
   
   init() {
     defaultValue()
@@ -289,9 +323,10 @@ public class FAQConfiguration {
     self.titleTextColor = UIColor.black
     self.titleTextFont = UIFont(name: "HelveticaNeue-Light", size: 20)
     self.titleLabelBackgroundColor = UIColor.clear
-    self.viewBackgroundColor =  UIColor(colorLiteralRed: 210/255, green: 210/255, blue: 210/255, alpha: 1)
+    let colorValue: Float = 210/255
+    self.viewBackgroundColor =  UIColor(colorLiteralRed: colorValue, green: colorValue, blue: colorValue, alpha: 1)
     self.cellBackgroundColor = UIColor.white
-    self.separatorColor = UIColor(colorLiteralRed: 210/255, green: 210/255, blue: 210/255, alpha: 1)
+    self.separatorColor = UIColor(colorLiteralRed: colorValue, green: colorValue, blue: colorValue, alpha: 1)
   }
 }
 
@@ -299,9 +334,9 @@ public class FAQConfiguration {
 class FAQViewCell: UITableViewCell {
   
   var questionLabel = UILabel()
-  var answerLabel = UILabel()
+  var answerTextView = UITextView()
   var indicatorImageView = UIImageView()
-  var answerLabelBottom = NSLayoutConstraint()
+  var answerTextViewBottom = NSLayoutConstraint()
   private var containerView =  UIView()
   
   var configuration: FAQConfiguration! {
@@ -313,17 +348,22 @@ class FAQViewCell: UITableViewCell {
   override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
     self.questionLabel.translatesAutoresizingMaskIntoConstraints = false
-    self.answerLabel.translatesAutoresizingMaskIntoConstraints = false
+    self.answerTextView.translatesAutoresizingMaskIntoConstraints = false
     self.indicatorImageView.translatesAutoresizingMaskIntoConstraints = false
     self.containerView.translatesAutoresizingMaskIntoConstraints = false
     self.questionLabel.numberOfLines = 0
-    self.answerLabel.numberOfLines = 0
+    answerTextView.isScrollEnabled = false
+    answerTextView.backgroundColor = UIColor.clear
+    let insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    answerTextView.textContainerInset = insets
+    answerTextView.isEditable = false
+    answerTextView.dataDetectorTypes = []
     let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
     self.indicatorImageView.image = indicatorImage
     self.indicatorImageView.contentMode = .scaleAspectFit
     self.containerView.addSubview(indicatorImageView)
     contentView.addSubview(questionLabel)
-    contentView.addSubview(answerLabel)
+    contentView.addSubview(answerTextView)
     contentView.addSubview(containerView)
     addLabelConstraints()
   }
@@ -333,10 +373,10 @@ class FAQViewCell: UITableViewCell {
     let questionLabelLeading = NSLayoutConstraint(item: questionLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
     let questionLabelTop = NSLayoutConstraint(item: questionLabel, attribute: .top, relatedBy: .equal, toItem: contentView, attribute: .top, multiplier: 1, constant: 10)
     
-    let answerLabelTrailing = NSLayoutConstraint(item: answerLabel, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
-    let answerLabelLeading = NSLayoutConstraint(item: answerLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
-    let answerLabelTop = NSLayoutConstraint(item: answerLabel, attribute: .top, relatedBy: .equal, toItem: questionLabel, attribute: .bottom, multiplier: 1, constant: 10)
-    answerLabelBottom = NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: answerLabel, attribute: .bottom, multiplier: 1, constant: 0)
+    let answerTextViewTrailing = NSLayoutConstraint(item: answerTextView, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
+    let answerTextViewLeading = NSLayoutConstraint(item: answerTextView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: -5)
+    let answerTextViewTop = NSLayoutConstraint(item: answerTextView, attribute: .top, relatedBy: .equal, toItem: questionLabel, attribute: .bottom, multiplier: 1, constant: 10)
+    answerTextViewBottom = NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: answerTextView, attribute: .bottom, multiplier: 1, constant: 0)
     
     let indicatorHorizontalCenter = NSLayoutConstraint(item: indicatorImageView, attribute: .centerX, relatedBy: .equal, toItem: containerView, attribute: .centerX, multiplier: 1, constant: 0)
     let indicatorVerticalCenter = NSLayoutConstraint(item: indicatorImageView, attribute: .centerY, relatedBy: .equal, toItem: containerView, attribute: .centerY, multiplier: 1, constant: 0)
@@ -349,8 +389,8 @@ class FAQViewCell: UITableViewCell {
     let containerHeight = NSLayoutConstraint(item: containerView, attribute: .height, relatedBy: .equal, toItem: questionLabel, attribute: .height, multiplier: 1, constant: 0)
     
     
-    NSLayoutConstraint.activate([questionLabelTrailing, questionLabelLeading, questionLabelTop, answerLabelLeading
-      , answerLabelTrailing, answerLabelTop ,answerLabelBottom, indicatorVerticalCenter, indicatorHorizontalCenter, indicatorWidth, indicatorHeight, containerTrailing, containerTop, containerWidth, containerHeight])
+    NSLayoutConstraint.activate([questionLabelTrailing, questionLabelLeading, questionLabelTop, answerTextViewLeading
+      , answerTextViewTrailing, answerTextViewTop ,answerTextViewBottom, indicatorVerticalCenter, indicatorHorizontalCenter, indicatorWidth, indicatorHeight, containerTrailing, containerTop, containerWidth, containerHeight])
   }
   
   required init?(coder aDecoder: NSCoder) {
@@ -360,33 +400,49 @@ class FAQViewCell: UITableViewCell {
   func configure(configuration: FAQConfiguration) {
     self.backgroundColor = configuration.cellBackgroundColor
     self.questionLabel.textColor = configuration.questionTextColor
-    self.answerLabel.textColor = configuration.answerTextColor
+    self.answerTextView.textColor = configuration.answerTextColor
     self.questionLabel.font = configuration.questionTextFont
-    self.answerLabel.font = configuration.answerTextFont
+    self.answerTextView.font = configuration.answerTextFont
+    if let dataDetectorTypes = configuration.dataDetectorTypes {
+      self.answerTextView.dataDetectorTypes = dataDetectorTypes
+    }
+    if let tintColor = configuration.tintColor {
+      self.answerTextView.tintColor = tintColor
+    }
   }
   
   func expand(withAnswer answer: String, animated: Bool) {
-    self.answerLabel.text = answer
-    if animated {
-      self.answerLabel.alpha = 0
-      UIView.animate(withDuration: 0.5, animations: {
-        self.answerLabel.alpha = 1
-      })
-    }
-    self.answerLabelBottom.constant = 20
-    self.update(arrow: .Up, animated: animated)
+    answerTextView.text = answer
+    expand(animated: animated)
   }
   
+  func expand(withAttributedAnswer attributedAnswer: NSAttributedString, animated: Bool) {
+    answerTextView.attributedText = attributedAnswer
+    expand(animated: animated)
+  }
+  
+  func expand(animated: Bool) {
+    answerTextView.isHidden = false
+    if animated {
+      answerTextView.alpha = 0
+      UIView.animate(withDuration: 0.5, animations: {
+        self.answerTextView.alpha = 1
+      })
+    }
+    answerTextViewBottom.constant = 20
+    update(arrow: .up, animated: animated)
+  }
   
   func collapse(animated: Bool) {
-    self.answerLabel.text = ""
-    self.answerLabelBottom.constant = 0
-    self.update(arrow: .Down, animated: animated)
+    answerTextView.text = ""
+    answerTextView.isHidden = true
+    answerTextViewBottom.constant = -20
+    update(arrow: .down, animated: animated)
   }
   
   func update(arrow: Arrow, animated: Bool) {
     switch arrow {
-    case .Up:
+    case .up:
       if animated {
         // Change direction from down to up with animation
         self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: false)
@@ -395,32 +451,35 @@ class FAQViewCell: UITableViewCell {
         // Change direction from down to up without animation
         self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
       }
-    case .Down:
+    case .down:
       if animated {
         // Change direction from up to down with animation
         self.indicatorImageView.rotate(withAngle: CGFloat(M_PI), animated: false)
         self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: true)
+      } else {
+        // Change direction from up to down without animation
+        self.indicatorImageView.rotate(withAngle: CGFloat(0), animated: false)
       }
     }
   }
 }
 
 enum Arrow: String {
-  case Up
-  case Down
+  case up
+  case down
 }
 
 enum CellOperation {
-  case Default
-  case Expand
-  case Expanded
-  case Collapse
+  case collapsed
+  case expand
+  case expanded
+  case collapse
 }
 
 extension UIImageView {
   func rotate(withAngle angle: CGFloat, animated: Bool) {
-      UIView.animate(withDuration: animated ? 0.5 : 0, animations: {
-        self.transform = CGAffineTransform(rotationAngle: angle)
-      })
+    UIView.animate(withDuration: animated ? 0.5 : 0, animations: {
+       self.transform = CGAffineTransform(rotationAngle: angle)
+    })
   }
 }

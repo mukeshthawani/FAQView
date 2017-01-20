@@ -37,6 +37,11 @@ let items = [FAQItem(question: "What is reddit?", answer: "reddit is a source fo
 let faqView = FAQView(frame: view.frame, items: items)
 view.addSubview(faqView)
 ```
+#### Attributed text answers
+
+You may use attributed text instead of plain text. Set the ```attributedAnswer``` property of items to an NSAttributedString. 
+
+
 
 #### Customization
 ```Swift
@@ -54,6 +59,12 @@ faqView.questionTextFont = UIFont(name: "HelveticaNeue-Light", size: 15)
 
 // View background color
 faqView.viewBackgroundColor = UIColor.white
+
+// Set up data detectors for automatic detection of links, phone numbers, etc., contained within the answer text.
+faqView.dataDetectorTypes = [.phoneNumber, .calendarEvent, .link]
+
+// Set color for links and detected data
+faqView.tintColor = UIColor.red
 
 ```
 
