@@ -29,9 +29,9 @@ class FAQViewTests: XCTestCase {
   func test_TitleLabelProperties_WhenSetToDefault() {
     let titleLabel = faqView.titleLabel
     let configuration = faqView.configuration
-    XCTAssertEqual(titleLabel?.backgroundColor, configuration.titleLabelBackgroundColor)
-    XCTAssertEqual(titleLabel?.textColor, configuration.titleTextColor)
-    XCTAssertEqual(titleLabel?.font, configuration.titleTextFont)
+    XCTAssertEqual(titleLabel.backgroundColor, configuration.titleLabelBackgroundColor)
+    XCTAssertEqual(titleLabel.textColor, configuration.titleTextColor)
+    XCTAssertEqual(titleLabel.font, configuration.titleTextFont)
   }
   
   func test_TitleLabelProperties_WhenCustomized() {
@@ -39,9 +39,9 @@ class FAQViewTests: XCTestCase {
     faqView.titleLabelBackgroundColor = UIColor.blue
     faqView.titleLabelTextColor = UIColor.blue
     faqView.titleLabelTextFont = UIFont.systemFont(ofSize: 20)
-    XCTAssertEqual(titleLabel?.backgroundColor, UIColor.blue)
-    XCTAssertEqual(titleLabel?.textColor, UIColor.blue)
-    XCTAssertEqual(titleLabel?.font, UIFont.systemFont(ofSize: 20))
+    XCTAssertEqual(titleLabel.backgroundColor, UIColor.blue)
+    XCTAssertEqual(titleLabel.textColor, UIColor.blue)
+    XCTAssertEqual(titleLabel.font, UIFont.systemFont(ofSize: 20))
   }
   
   func test_ViewBackgroundColor_WhenSetToDefault() {
@@ -72,7 +72,7 @@ class FAQViewTests: XCTestCase {
   
   func test_AnswerLabelProperties_WhenSetToDefault() {
     let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
-    let answerLabel = faqViewCell.answerLabel
+    let answerLabel = faqViewCell.answerTextView
     let configuration = faqView.configuration
     XCTAssertEqual(answerLabel.textColor, configuration.answerTextColor)
     XCTAssertEqual(answerLabel.font, configuration.answerTextFont)
@@ -82,7 +82,7 @@ class FAQViewTests: XCTestCase {
     faqView.answerTextColor = blueColor
     faqView.answerTextFont = systemFont
     let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
-    let answerLabel = faqViewCell.answerLabel
+    let answerLabel = faqViewCell.answerTextView
     XCTAssertEqual(answerLabel.textColor, blueColor)
     XCTAssertEqual(answerLabel.font, systemFont)
   }

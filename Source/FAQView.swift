@@ -9,12 +9,28 @@ import Foundation
 
 public class FAQView: UIView {
   
-  var tableView: UITableView!
-  var titleLabel: UILabel!
+  var tableView: UITableView = {
+    let tableview = UITableView()
+    tableview.translatesAutoresizingMaskIntoConstraints = false
+    tableview.backgroundColor = UIColor.clear
+    tableview.allowsSelection = false
+    tableview.separatorStyle = .none
+    tableview.estimatedRowHeight = 50
+    tableview.tableFooterView = UIView()
+    return tableview
+  }()
+  
+  var titleLabel: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.numberOfLines = 0
+    label.textAlignment = .center
+    return label
+  }()
   
   public var items: [FAQItem]
   
-  var expandedCells: [CellOperation]!
+  var expandedCells = [CellOperation]()
   
   public var questionTextColor: UIColor!  {
     get {
@@ -134,30 +150,30 @@ public class FAQView: UIView {
   public init(frame: CGRect,title: String = "Top Queries", items: [FAQItem]) {
     self.items = items
     super.init(frame: frame)
-    self.tableView = UITableView(frame: CGRect(x: 0, y: 0, width: 0, height: 0), style: .grouped)
-    self.tableView.translatesAutoresizingMaskIntoConstraints = false
-    self.tableView.backgroundColor = UIColor.clear
-    self.tableView.register(FAQViewCell.self, forCellReuseIdentifier: "cell")
-    self.tableView.allowsSelection = false
-    self.tableView.dataSource = self
-    self.tableView.delegate = self
-    self.expandedCells = []
-    self.tableView.estimatedRowHeight = 50
-    self.tableView.tableFooterView = UIView()
-    self.titleLabel = UILabel()
-    self.titleLabel.translatesAutoresizingMaskIntoConstraints = false
-    self.titleLabel.text = title
-    self.titleLabel.numberOfLines = 0
-    self.titleLabel.textAlignment = .center
-    self.titleLabel.textColor = configuration.titleTextColor
-    self.titleLabel.font = configuration.titleTextFont
-    self.titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
-    self.backgroundColor = configuration.viewBackgroundColor
-    self.tableView.separatorStyle = .none
     expandedCells = Array(repeating: CellOperation.collapsed, count: items.count)
+    setupTitleView(title: title)
+    setupTableView()
+    setupView()
     self.addSubview(tableView)
     self.addSubview(titleLabel)
     addConstraintsForTableViewAndTitleLabel()
+  }
+  
+  private func setupTitleView(title: String) {
+    self.titleLabel.textColor = configuration.titleTextColor
+    self.titleLabel.font = configuration.titleTextFont
+    self.titleLabel.backgroundColor = configuration.titleLabelBackgroundColor
+    self.titleLabel.text = title
+  }
+  
+  private func setupTableView() {
+    self.tableView.register(FAQViewCell.self, forCellReuseIdentifier: "cell")
+    self.tableView.dataSource = self
+    self.tableView.delegate = self
+  }
+  
+  private func setupView() {
+    self.backgroundColor = configuration.viewBackgroundColor
   }
   
   private func addConstraintsForTableViewAndTitleLabel() {
@@ -179,14 +195,6 @@ public class FAQView: UIView {
     fatalError("init(coder:) has not been implemented")
   }
   
-  func handleQuestionLabelTap(_ sender: UITapGestureRecognizer) {
-    let section = sender.view?.tag
-    guard let sectionValue = section else {
-      return
-    }
-    updateSection(sectionValue)
-  }
-  
   func updateSection(_ section: Int) {
     if expandedCells[section] == .expanded {
       expandedCells[section] = .collapse
@@ -197,37 +205,11 @@ public class FAQView: UIView {
     tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
   }
   
-  func configureCells(cell: FAQViewCell, currentItem: FAQItem, indexPath: IndexPath) {
-    cell.questionLabel.text = currentItem.question
-    cell.questionLabel.tag = indexPath.section
-    let gestureRecog = UITapGestureRecognizer(target: self, action
-      : #selector(FAQView.handleQuestionLabelTap(_:)))
-    cell.questionLabel.addGestureRecognizer(gestureRecog)
-    cell.questionLabel.isUserInteractionEnabled = true
-    cell.indicatorImageView.tag = indexPath.section
-    let gestureRecogizerForImage = UITapGestureRecognizer(target: self, action: #selector(FAQView.handleQuestionLabelTap(_:)))
-    cell.indicatorImageView.addGestureRecognizer(gestureRecogizerForImage)
-    cell.indicatorImageView.isUserInteractionEnabled = true
-    let cellOperation = expandedCells[indexPath.section]
-    switch cellOperation {
-    case .collapsed:
-      cell.collapse(animated: false)
-    case .expand:
-      if let answer = currentItem.answer {
-        cell.expand(withAnswer: answer, animated: true)
-      } else if let attributedAnswer = currentItem.attributedAnswer {
-        cell.expand(withAttributedAnswer: attributedAnswer, animated: true)
-      }
-      expandedCells[indexPath.section] = .expanded
-    case .collapse:
-      cell.collapse(animated: true)
-      expandedCells[indexPath.section] = .collapsed
-    case .expanded:
-      if let answer = currentItem.answer {
-        cell.expand(withAnswer: answer, animated: false)
-      } else if let attributedAnswer = currentItem.attributedAnswer {
-        cell.expand(withAttributedAnswer: attributedAnswer, animated: false)
-      }
+  func updateCellOperation(section: Int, cellOperation: CellOperation) {
+    if cellOperation == .expand {
+      expandedCells[section] = .expanded
+    } else if cellOperation == .collapse {
+      expandedCells[section] = .collapsed
     }
   }
 }
@@ -259,7 +241,15 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
     let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath) as! FAQViewCell
     cell.configuration = configuration
     let currentItem = items[indexPath.section]
-    configureCells(cell: cell, currentItem: currentItem, indexPath: indexPath)
+    let cellOperation = expandedCells[indexPath.section]
+    cell.configure(currentItem: currentItem, indexPath: indexPath, cellOperation: cellOperation)
+    updateCellOperation(section: indexPath.section, cellOperation: cellOperation)
+    cell.didSelectQuestion = { [weak self] cell in
+      guard let faqView = self else {
+        return
+      }
+      faqView.updateSection(indexPath.section)
+    }
     return cell
   }
   
@@ -333,39 +323,105 @@ public class FAQConfiguration {
 
 class FAQViewCell: UITableViewCell {
   
-  var questionLabel = UILabel()
-  var answerTextView = UITextView()
-  var indicatorImageView = UIImageView()
+  var questionLabel: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.numberOfLines = 0
+    return label
+  }()
+  
+  var answerTextView: UITextView = {
+    let textView = UITextView()
+    textView.translatesAutoresizingMaskIntoConstraints = false
+    textView.backgroundColor = UIColor.clear
+    textView.isScrollEnabled = false
+    textView.textContainerInset = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    textView.isEditable = false
+    textView.dataDetectorTypes = []
+    return textView
+  }()
+  
+  var indicatorImageView: UIImageView = {
+    let imageView = UIImageView()
+    imageView.translatesAutoresizingMaskIntoConstraints = false
+    imageView.contentMode = .scaleAspectFit
+    let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
+    imageView.image = indicatorImage
+    return imageView
+  }()
+  
   var answerTextViewBottom = NSLayoutConstraint()
-  private var containerView =  UIView()
+  
+  private var containerView: UIView = {
+    let view = UIView()
+    view.translatesAutoresizingMaskIntoConstraints = false
+    return view
+  }()
   
   var configuration: FAQConfiguration! {
     didSet {
-      configure(configuration: configuration)
+      setup(with: configuration)
     }
   }
   
+  var didSelectQuestion: ((_ cell: FAQViewCell) ->())?
+  
+  private let actionByQuestionTap = #selector(didTapQuestion)
+  
   override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
-    self.questionLabel.translatesAutoresizingMaskIntoConstraints = false
-    self.answerTextView.translatesAutoresizingMaskIntoConstraints = false
-    self.indicatorImageView.translatesAutoresizingMaskIntoConstraints = false
-    self.containerView.translatesAutoresizingMaskIntoConstraints = false
-    self.questionLabel.numberOfLines = 0
-    answerTextView.isScrollEnabled = false
-    answerTextView.backgroundColor = UIColor.clear
-    let insets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
-    answerTextView.textContainerInset = insets
-    answerTextView.isEditable = false
-    answerTextView.dataDetectorTypes = []
-    let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
-    self.indicatorImageView.image = indicatorImage
-    self.indicatorImageView.contentMode = .scaleAspectFit
+    selectionSetup()
     self.containerView.addSubview(indicatorImageView)
     contentView.addSubview(questionLabel)
     contentView.addSubview(answerTextView)
     contentView.addSubview(containerView)
     addLabelConstraints()
+  }
+  
+  private func selectionSetup() {
+    questionLabel.isUserInteractionEnabled = true
+    indicatorImageView.isUserInteractionEnabled = true
+    let questionLabelGestureRecognizer = UITapGestureRecognizer(target: self, action
+      : actionByQuestionTap)
+    questionLabel.addGestureRecognizer(questionLabelGestureRecognizer)
+    let imageGestureRecognizer = UITapGestureRecognizer(target: self, action: actionByQuestionTap)
+    indicatorImageView.addGestureRecognizer(imageGestureRecognizer)
+  }
+  
+  private func setup(with configuration: FAQConfiguration) {
+    self.backgroundColor = configuration.cellBackgroundColor
+    self.questionLabel.textColor = configuration.questionTextColor
+    self.answerTextView.textColor = configuration.answerTextColor
+    self.questionLabel.font = configuration.questionTextFont
+    self.answerTextView.font = configuration.answerTextFont
+    if let dataDetectorTypes = configuration.dataDetectorTypes {
+      self.answerTextView.dataDetectorTypes = dataDetectorTypes
+    }
+    if let tintColor = configuration.tintColor {
+      self.answerTextView.tintColor = tintColor
+    }
+  }
+  
+  func configure(currentItem: FAQItem, indexPath: IndexPath, cellOperation: CellOperation) {
+    questionLabel.text = currentItem.question
+    switch cellOperation {
+    case .collapsed:
+      collapse(animated: false)
+    case .expand:
+      if let answer = currentItem.answer {
+        expand(withAnswer: answer, animated: true)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        expand(withAttributedAnswer: attributedAnswer, animated: true)
+      }
+    case .collapse:
+      collapse(animated: true)
+    case .expanded:
+      if let answer = currentItem.answer {
+        expand(withAnswer: answer, animated: false)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        expand(withAttributedAnswer: attributedAnswer, animated: false)
+      }
+    }
   }
   
   private func addLabelConstraints() {
@@ -397,18 +453,8 @@ class FAQViewCell: UITableViewCell {
     fatalError("init(coder:) has not been implemented")
   }
   
-  func configure(configuration: FAQConfiguration) {
-    self.backgroundColor = configuration.cellBackgroundColor
-    self.questionLabel.textColor = configuration.questionTextColor
-    self.answerTextView.textColor = configuration.answerTextColor
-    self.questionLabel.font = configuration.questionTextFont
-    self.answerTextView.font = configuration.answerTextFont
-    if let dataDetectorTypes = configuration.dataDetectorTypes {
-      self.answerTextView.dataDetectorTypes = dataDetectorTypes
-    }
-    if let tintColor = configuration.tintColor {
-      self.answerTextView.tintColor = tintColor
-    }
+  @objc private func didTapQuestion(_ recognizer: UIGestureRecognizer) {
+    self.didSelectQuestion?(self)
   }
   
   func expand(withAnswer answer: String, animated: Bool) {
