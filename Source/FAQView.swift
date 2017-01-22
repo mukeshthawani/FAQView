@@ -9,28 +9,9 @@ import Foundation
 
 public class FAQView: UIView {
   
-  var tableView: UITableView = {
-    let tableview = UITableView()
-    tableview.translatesAutoresizingMaskIntoConstraints = false
-    tableview.backgroundColor = UIColor.clear
-    tableview.allowsSelection = false
-    tableview.separatorStyle = .none
-    tableview.estimatedRowHeight = 50
-    tableview.tableFooterView = UIView()
-    return tableview
-  }()
-  
-  var titleLabel: UILabel = {
-    let label = UILabel()
-    label.translatesAutoresizingMaskIntoConstraints = false
-    label.numberOfLines = 0
-    label.textAlignment = .center
-    return label
-  }()
+  // MARK: Public Properties
   
   public var items: [FAQItem]
-  
-  var expandedCells = [CellOperation]()
   
   public var questionTextColor: UIColor!  {
     get {
@@ -144,8 +125,32 @@ public class FAQView: UIView {
     }
   }
   
+  // MARK: Internal Properties
+  
+  var tableView: UITableView = {
+    let tableview = UITableView()
+    tableview.translatesAutoresizingMaskIntoConstraints = false
+    tableview.backgroundColor = UIColor.clear
+    tableview.allowsSelection = false
+    tableview.separatorStyle = .none
+    tableview.estimatedRowHeight = 50
+    tableview.tableFooterView = UIView()
+    return tableview
+  }()
+  
+  var titleLabel: UILabel = {
+    let label = UILabel()
+    label.translatesAutoresizingMaskIntoConstraints = false
+    label.numberOfLines = 0
+    label.textAlignment = .center
+    return label
+  }()
+
+  var expandedCells = [CellOperation]()
   var configuration = FAQConfiguration()
   var heightAtIndexPath = NSMutableDictionary()
+  
+  // MARK: Initialization
   
   public init(frame: CGRect,title: String = "Top Queries", items: [FAQItem]) {
     self.items = items
@@ -158,6 +163,32 @@ public class FAQView: UIView {
     self.addSubview(titleLabel)
     addConstraintsForTableViewAndTitleLabel()
   }
+  
+  required public init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  // MARK: Internal Methods
+  
+  func updateSection(_ section: Int) {
+    if expandedCells[section] == .expanded {
+      expandedCells[section] = .collapse
+    } else {
+      expandedCells[section] = .expand
+    }
+    tableView.reloadSections(IndexSet(integer: section), with: .fade)
+    tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
+  }
+  
+  func updateCellOperation(section: Int, cellOperation: CellOperation) {
+    if cellOperation == .expand {
+      expandedCells[section] = .expanded
+    } else if cellOperation == .collapse {
+      expandedCells[section] = .collapsed
+    }
+  }
+
+  // MARK: Private Methods
   
   private func setupTitleView(title: String) {
     self.titleLabel.textColor = configuration.titleTextColor
@@ -190,31 +221,10 @@ public class FAQView: UIView {
     NSLayoutConstraint.activate([tableViewTrailing, tableViewLeading, tableViewTop, tableViewBottom, titleLabelLeading, titleLabelTrailing, titleLabelTop])
   }
   
-  
-  required public init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-  
-  func updateSection(_ section: Int) {
-    if expandedCells[section] == .expanded {
-      expandedCells[section] = .collapse
-    } else {
-      expandedCells[section] = .expand
-    }
-    tableView.reloadSections(IndexSet(integer: section), with: .fade)
-    tableView.scrollToRow(at: IndexPath(row: 0, section: section), at: .top, animated: true)
-  }
-  
-  func updateCellOperation(section: Int, cellOperation: CellOperation) {
-    if cellOperation == .expand {
-      expandedCells[section] = .expanded
-    } else if cellOperation == .collapse {
-      expandedCells[section] = .collapsed
-    }
-  }
 }
 
 extension FAQView: UITableViewDelegate, UITableViewDataSource {
+  
   public func tableView(_ tableView: UITableView, estimatedHeightForRowAt indexPath: IndexPath) -> CGFloat {
     let height = self.heightAtIndexPath.object(forKey: indexPath)
     if ((height) != nil) {
@@ -323,6 +333,8 @@ public class FAQConfiguration {
 
 class FAQViewCell: UITableViewCell {
   
+  // MARK: Internal Properties
+  
   var questionLabel: UILabel = {
     let label = UILabel()
     label.translatesAutoresizingMaskIntoConstraints = false
@@ -352,12 +364,6 @@ class FAQViewCell: UITableViewCell {
   
   var answerTextViewBottom = NSLayoutConstraint()
   
-  private var containerView: UIView = {
-    let view = UIView()
-    view.translatesAutoresizingMaskIntoConstraints = false
-    return view
-  }()
-  
   var configuration: FAQConfiguration! {
     didSet {
       setup(with: configuration)
@@ -366,7 +372,17 @@ class FAQViewCell: UITableViewCell {
   
   var didSelectQuestion: ((_ cell: FAQViewCell) ->())?
   
+  // MARK: Private Properties
+  
   private let actionByQuestionTap = #selector(didTapQuestion)
+  
+  private var containerView: UIView = {
+    let view = UIView()
+    view.translatesAutoresizingMaskIntoConstraints = false
+    return view
+  }()
+  
+  // MARK: Initialization
   
   override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
     super.init(style: style, reuseIdentifier: reuseIdentifier)
@@ -377,6 +393,34 @@ class FAQViewCell: UITableViewCell {
     contentView.addSubview(containerView)
     addLabelConstraints()
   }
+  
+  required init?(coder aDecoder: NSCoder) {
+    fatalError("init(coder:) has not been implemented")
+  }
+  
+  func configure(currentItem: FAQItem, indexPath: IndexPath, cellOperation: CellOperation) {
+    questionLabel.text = currentItem.question
+    switch cellOperation {
+    case .collapsed:
+      collapse(animated: false)
+    case .expand:
+      if let answer = currentItem.answer {
+        expand(withAnswer: answer, animated: true)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        expand(withAttributedAnswer: attributedAnswer, animated: true)
+      }
+    case .collapse:
+      collapse(animated: true)
+    case .expanded:
+      if let answer = currentItem.answer {
+        expand(withAnswer: answer, animated: false)
+      } else if let attributedAnswer = currentItem.attributedAnswer {
+        expand(withAttributedAnswer: attributedAnswer, animated: false)
+      }
+    }
+  }
+  
+  // MARK: Private Methods
   
   private func selectionSetup() {
     questionLabel.isUserInteractionEnabled = true
@@ -399,28 +443,6 @@ class FAQViewCell: UITableViewCell {
     }
     if let tintColor = configuration.tintColor {
       self.answerTextView.tintColor = tintColor
-    }
-  }
-  
-  func configure(currentItem: FAQItem, indexPath: IndexPath, cellOperation: CellOperation) {
-    questionLabel.text = currentItem.question
-    switch cellOperation {
-    case .collapsed:
-      collapse(animated: false)
-    case .expand:
-      if let answer = currentItem.answer {
-        expand(withAnswer: answer, animated: true)
-      } else if let attributedAnswer = currentItem.attributedAnswer {
-        expand(withAttributedAnswer: attributedAnswer, animated: true)
-      }
-    case .collapse:
-      collapse(animated: true)
-    case .expanded:
-      if let answer = currentItem.answer {
-        expand(withAnswer: answer, animated: false)
-      } else if let attributedAnswer = currentItem.attributedAnswer {
-        expand(withAttributedAnswer: attributedAnswer, animated: false)
-      }
     }
   }
   
@@ -449,25 +471,21 @@ class FAQViewCell: UITableViewCell {
       , answerTextViewTrailing, answerTextViewTop ,answerTextViewBottom, indicatorVerticalCenter, indicatorHorizontalCenter, indicatorWidth, indicatorHeight, containerTrailing, containerTop, containerWidth, containerHeight])
   }
   
-  required init?(coder aDecoder: NSCoder) {
-    fatalError("init(coder:) has not been implemented")
-  }
-  
   @objc private func didTapQuestion(_ recognizer: UIGestureRecognizer) {
     self.didSelectQuestion?(self)
   }
   
-  func expand(withAnswer answer: String, animated: Bool) {
+  private func expand(withAnswer answer: String, animated: Bool) {
     answerTextView.text = answer
     expand(animated: animated)
   }
   
-  func expand(withAttributedAnswer attributedAnswer: NSAttributedString, animated: Bool) {
+  private func expand(withAttributedAnswer attributedAnswer: NSAttributedString, animated: Bool) {
     answerTextView.attributedText = attributedAnswer
     expand(animated: animated)
   }
   
-  func expand(animated: Bool) {
+  private func expand(animated: Bool) {
     answerTextView.isHidden = false
     if animated {
       answerTextView.alpha = 0
@@ -479,14 +497,14 @@ class FAQViewCell: UITableViewCell {
     update(arrow: .up, animated: animated)
   }
   
-  func collapse(animated: Bool) {
+  private func collapse(animated: Bool) {
     answerTextView.text = ""
     answerTextView.isHidden = true
     answerTextViewBottom.constant = -20
     update(arrow: .down, animated: animated)
   }
   
-  func update(arrow: Arrow, animated: Bool) {
+  private func update(arrow: Arrow, animated: Bool) {
     switch arrow {
     case .up:
       if animated {
