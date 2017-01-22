@@ -87,4 +87,19 @@ class FAQViewTests: XCTestCase {
     XCTAssertEqual(answerLabel.font, systemFont)
   }
   
+  func test_CellConfiguration_WhenExpanded() {
+    let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
+    faqViewCell.configure(currentItem: faqView.items.first!, indexPath: IndexPath(row: 0, section: 0), cellOperation: .expand)
+    faqView.updateCellOperation(section: 0, cellOperation: .expand)
+    XCTAssertEqual(faqViewCell.answerTextView.text, faqView.items.first?.answer)
+    XCTAssertEqual(faqView.expandedCells[0], .expanded)
+  }
+  
+  func test_CellConfiguration_WhenCollapsed() {
+    let faqViewCell = faqView.tableView(faqView.tableView, cellForRowAt: IndexPath(row: 0, section: 0)) as! FAQViewCell
+    faqViewCell.configure(currentItem: faqView.items.first!, indexPath: IndexPath(row: 0, section: 0), cellOperation: .collapse)
+    faqView.updateCellOperation(section: 0, cellOperation: .collapse)
+    XCTAssertEqual(faqViewCell.answerTextView.text, "")
+    XCTAssertEqual(faqView.expandedCells[0], .collapsed)
+  }
 }
