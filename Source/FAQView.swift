@@ -323,10 +323,10 @@ public class FAQConfiguration {
     self.titleTextColor = UIColor.black
     self.titleTextFont = UIFont(name: "HelveticaNeue-Light", size: 20)
     self.titleLabelBackgroundColor = UIColor.clear
-    let colorValue: Float = 210/255
-    self.viewBackgroundColor =  UIColor(colorLiteralRed: colorValue, green: colorValue, blue: colorValue, alpha: 1)
+    let colorValue: CGFloat = 210/255
+    self.viewBackgroundColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
     self.cellBackgroundColor = UIColor.white
-    self.separatorColor = UIColor(colorLiteralRed: colorValue, green: colorValue, blue: colorValue, alpha: 1)
+    self.separatorColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
   }
 }
 
