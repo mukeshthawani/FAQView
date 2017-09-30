@@ -1,5 +1,5 @@
 language: objective-c
-osx_image: xcode8
+osx_image: xcode9
 
 script:
-  xcodebuild clean build test -project FAQView.xcodeproj -scheme FAQView -sdk iphonesimulator -destination 'platform=iOS Simulator,name=iPhone 6'
+    - xcodebuild clean build test -project FAQView.xcodeproj -scheme FAQView -destination "platform=iOS Simulator,name=iPhone 7,OS=10.1" CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO ONLY_ACTIVE_ARCH=NO
