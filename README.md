@@ -19,7 +19,7 @@ and run `pod install`.
 
     use_frameworks!
     target 'Your target name'
-    pod 'FAQView'
+    pod 'FAQView', '~> 0.5.0'
 
 ## Or Add source
 
@@ -70,8 +70,10 @@ faqView.tintColor = UIColor.red
 
 ## Requirements
 
-- Swift 3 / Xcode 8
-- iOS 9.0
+- Swift 4.0
+- Xcode 9.0+
+- FAQView 0.4.x is compatible with Swift 3
+- iOS 9.0+
 
 ## Author
 
