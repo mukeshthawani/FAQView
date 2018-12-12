@@ -230,7 +230,11 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
     if ((height) != nil) {
       return CGFloat(height as! CGFloat)
     } else {
-      return UITableViewAutomaticDimension
+      #if swift(>=4.2)
+        return UITableView.automaticDimension
+      #else
+        return UITableViewAutomaticDimension
+      #endif
     }
   }
   
@@ -383,9 +387,19 @@ class FAQViewCell: UITableViewCell {
   }()
   
   // MARK: Initialization
-  
-  override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
-    super.init(style: style, reuseIdentifier: reuseIdentifier)
+  #if swift(>=4.2)
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+      super.init(style: style, reuseIdentifier: reuseIdentifier)
+      viewSetup()
+    }
+  #else
+    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+      super.init(style: style, reuseIdentifier: reuseIdentifier)
+      viewSetup()
+    }
+  #endif
+
+  private func viewSetup() {
     selectionSetup()
     self.containerView.addSubview(indicatorImageView)
     contentView.addSubview(questionLabel)
@@ -393,7 +407,7 @@ class FAQViewCell: UITableViewCell {
     contentView.addSubview(containerView)
     addLabelConstraints()
   }
-  
+
   required init?(coder aDecoder: NSCoder) {
     fatalError("init(coder:) has not been implemented")
   }
