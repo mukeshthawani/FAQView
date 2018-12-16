@@ -34,7 +34,7 @@ Simply add
 let items = [FAQItem(question: "What is reddit?", answer: "reddit is a source for what's new and popular on the web."),
             FAQItem(question: "How is a submission's score determined?", answer: "A submission's score is simply the number of upvotes minus the number of downvotes.")]
 
-let faqView = FAQView(frame: view.frame, items: items)
+let faqView = FAQView(frame: view.frame, title: "Top Queries", items: items)
 view.addSubview(faqView)
 ```
 #### Attributed text answers
@@ -45,9 +45,6 @@ You may use attributed text instead of plain text. Set the ```attributedAnswer``
 
 #### Customization
 ```Swift
-// Change title
-faqView.titleLabelText = "Top Queries"
-
 // Question text color  
 faqView.questionTextColor = UIColor.blue
 
