@@ -45,9 +45,6 @@ You may use attributed text instead of plain text. Set the ```attributedAnswer``
 
 #### Customization
 ```Swift
-// Change title
-faqView.titleLabelText = "Top Queries"
-
 // Question text color  
 faqView.questionTextColor = UIColor.blue
 
