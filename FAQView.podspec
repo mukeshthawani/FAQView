@@ -3,7 +3,7 @@ Pod::Spec.new do |s|
   s.platform     = :ios
   s.ios.deployment_target = '9.0'
   s.name         = "FAQView"
-  s.version      = "0.5.0"
+  s.version      = "0.6.0"
   s.summary      = "An easy to use FAQ view for iOS written in Swift."
   s.homepage     = "https://github.com/mukeshthawani/FAQView"
   s.license      = "MIT"
