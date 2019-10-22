@@ -124,6 +124,15 @@ public class FAQView: UIView {
       configuration.tintColor = value
     }
   }
+    
+ public var indicatorColor: UIColor! {
+   get {
+     return configuration.indicatorColor
+   }
+   set(value) {
+    configuration.indicatorColor = value
+   }
+ }
   
   // MARK: Internal Properties
   
@@ -314,6 +323,7 @@ public class FAQConfiguration {
   public var titleLabelBackgroundColor: UIColor?
   public var dataDetectorTypes: UIDataDetectorTypes?
   public var tintColor: UIColor?
+  public var indicatorColor: UIColor?
   
   init() {
     defaultValue()
@@ -331,9 +341,9 @@ public class FAQConfiguration {
     self.viewBackgroundColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
     self.cellBackgroundColor = UIColor.white
     self.separatorColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
+    self.indicatorColor = UIColor.black
   }
 }
-
 
 class FAQViewCell: UITableViewCell {
   
@@ -362,7 +372,7 @@ class FAQViewCell: UITableViewCell {
     imageView.translatesAutoresizingMaskIntoConstraints = false
     imageView.contentMode = .scaleAspectFit
     let indicatorImage = UIImage(named: "DownArrow", in: Bundle(for: FAQView.self), compatibleWith: nil)
-    imageView.image = indicatorImage
+    imageView.image = indicatorImage?.withRenderingMode(.alwaysTemplate)
     return imageView
   }()
   
@@ -452,6 +462,7 @@ class FAQViewCell: UITableViewCell {
     self.answerTextView.textColor = configuration.answerTextColor
     self.questionLabel.font = configuration.questionTextFont
     self.answerTextView.font = configuration.answerTextFont
+    self.indicatorImageView.tintColor = configuration.indicatorColor
     if let dataDetectorTypes = configuration.dataDetectorTypes {
       self.answerTextView.dataDetectorTypes = dataDetectorTypes
     }
