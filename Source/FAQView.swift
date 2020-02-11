@@ -13,6 +13,7 @@ public class FAQView: UIView {
   
   public var items: [FAQItem]
   
+    
   public var questionTextColor: UIColor!  {
     get {
       return configuration.questionTextColor
@@ -133,6 +134,15 @@ public class FAQView: UIView {
     configuration.indicatorColor = value
    }
  }
+    
+    public var positionType: Position? {
+         get {
+           return configuration.positionType
+         }
+         set(value) {
+          configuration.positionType = value
+         }
+       }
   
   // MARK: Internal Properties
   
@@ -242,7 +252,7 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
       #if swift(>=4.2)
         return UITableView.automaticDimension
       #else
-        return UITableViewAutomaticDimension
+        return UITableView.automaticDimension
       #endif
     }
   }
@@ -324,24 +334,65 @@ public class FAQConfiguration {
   public var dataDetectorTypes: UIDataDetectorTypes?
   public var tintColor: UIColor?
   public var indicatorColor: UIColor?
+  public var positionType: Position?
+
   
   init() {
     defaultValue()
   }
   
   func defaultValue() {
-    self.questionTextColor = UIColor.black
-    self.answerTextColor = UIColor.black
     self.questionTextFont = UIFont(name: "HelveticaNeue-Bold", size: 16)
     self.answerTextFont = UIFont(name: "HelveticaNeue-Light", size: 15)
-    self.titleTextColor = UIColor.black
     self.titleTextFont = UIFont(name: "HelveticaNeue-Light", size: 20)
     self.titleLabelBackgroundColor = UIColor.clear
     let colorValue: CGFloat = 210/255
-    self.viewBackgroundColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
-    self.cellBackgroundColor = UIColor.white
-    self.separatorColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
-    self.indicatorColor = UIColor.black
+ 
+    
+    if #available(iOS 13.0, *) {
+        self.questionTextColor = .label
+    } else {
+        self.questionTextColor = UIColor.black
+    }
+    
+    if #available(iOS 13.0, *) {
+        self.answerTextColor = .label
+    } else {
+        self.answerTextColor = UIColor.black
+    }
+    
+    if #available(iOS 13.0, *) {
+           self.titleTextColor = .label
+       } else {
+           self.titleTextColor = UIColor.black
+       }
+    
+    if #available(iOS 13.0, *) {
+        self.viewBackgroundColor = .systemGroupedBackground
+    } else {
+        self.viewBackgroundColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
+    }
+    
+    if #available(iOS 13.0, *) {
+        self.cellBackgroundColor = .secondarySystemGroupedBackground
+    } else {
+       self.cellBackgroundColor = UIColor.white
+    }
+    
+    if #available(iOS 13.0, *) {
+           self.separatorColor = .systemGroupedBackground
+       } else {
+           self.separatorColor = UIColor(red: colorValue, green: colorValue, blue: colorValue, alpha: 1)
+       }
+    
+    if #available(iOS 13.0, *) {
+        self.indicatorColor = .label
+          } else {
+           self.indicatorColor = UIColor.black
+          }
+    
+    self.positionType = .right
+
   }
 }
 
@@ -462,27 +513,44 @@ class FAQViewCell: UITableViewCell {
     self.answerTextView.textColor = configuration.answerTextColor
     self.questionLabel.font = configuration.questionTextFont
     self.answerTextView.font = configuration.answerTextFont
+    
+    if let positionType = configuration.positionType {
+    setupTextAlignment(position: positionType)
+    addConstraintsDependOnPositionType(position: positionType)
+    }
+    
     self.indicatorImageView.tintColor = configuration.indicatorColor
+    
     if let dataDetectorTypes = configuration.dataDetectorTypes {
       self.answerTextView.dataDetectorTypes = dataDetectorTypes
     }
     if let tintColor = configuration.tintColor {
       self.answerTextView.tintColor = tintColor
     }
+  
   }
+    
+    private func setupTextAlignment(position:Position){
+        switch position {
+          case .left:
+              
+              self.questionLabel.textAlignment = .left
+              self.answerTextView.textAlignment = .left
+              
+              case .right:
+                self.questionLabel.textAlignment = .right
+                self.answerTextView.textAlignment = .right
+
+          }
+    }
   
   private func addLabelConstraints() {
-    let questionLabelTrailing = NSLayoutConstraint(item: questionLabel, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
-    let questionLabelLeading = NSLayoutConstraint(item: questionLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
     let questionLabelTop = NSLayoutConstraint(item: questionLabel, attribute: .top, relatedBy: .equal, toItem: contentView, attribute: .top, multiplier: 1, constant: 10)
     
-    let answerTextViewTrailing = NSLayoutConstraint(item: answerTextView, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
-    let answerTextViewLeading = NSLayoutConstraint(item: answerTextView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: -5)
+   
     let answerTextViewTop = NSLayoutConstraint(item: answerTextView, attribute: .top, relatedBy: .equal, toItem: questionLabel, attribute: .bottom, multiplier: 1, constant: 10)
     answerTextViewBottom = NSLayoutConstraint(item: contentView, attribute: .bottom, relatedBy: .equal, toItem: answerTextView, attribute: .bottom, multiplier: 1, constant: 0)
     
-    let indicatorHorizontalCenter = NSLayoutConstraint(item: indicatorImageView, attribute: .centerX, relatedBy: .equal, toItem: containerView, attribute: .centerX, multiplier: 1, constant: 0)
-    let indicatorVerticalCenter = NSLayoutConstraint(item: indicatorImageView, attribute: .centerY, relatedBy: .equal, toItem: containerView, attribute: .centerY, multiplier: 1, constant: 0)
     let indicatorWidth = NSLayoutConstraint(item: indicatorImageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 30)
     let indicatorHeight = NSLayoutConstraint(item: indicatorImageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1, constant: 30)
     
@@ -491,10 +559,47 @@ class FAQViewCell: UITableViewCell {
     let containerTop = NSLayoutConstraint(item: containerView, attribute: .top, relatedBy: .equal, toItem: contentView,attribute: .top, multiplier: 1, constant: 10)
     let containerHeight = NSLayoutConstraint(item: containerView, attribute: .height, relatedBy: .equal, toItem: questionLabel, attribute: .height, multiplier: 1, constant: 0)
     
-    
-    NSLayoutConstraint.activate([questionLabelTrailing, questionLabelLeading, questionLabelTop, answerTextViewLeading
-      , answerTextViewTrailing, answerTextViewTop ,answerTextViewBottom, indicatorVerticalCenter, indicatorHorizontalCenter, indicatorWidth, indicatorHeight, containerTrailing, containerTop, containerWidth, containerHeight])
+    NSLayoutConstraint.activate([questionLabelTop
+      , answerTextViewTop ,answerTextViewBottom, indicatorWidth, indicatorHeight, containerTrailing, containerTop, containerWidth, containerHeight])
   }
+    
+    private func addConstraintsDependOnPositionType(position:Position){
+        
+        var questionLabelTrailing = NSLayoutConstraint()
+        var questionLabelLeading = NSLayoutConstraint()
+
+        var answerTextViewTrailing = NSLayoutConstraint()
+        var answerTextViewLeading = NSLayoutConstraint()
+
+        var indicatorFirstConstraint = NSLayoutConstraint()
+        var indicatorSecondConstraint = NSLayoutConstraint()
+
+        switch position {
+            
+        case .left:
+             questionLabelTrailing = NSLayoutConstraint(item: questionLabel, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
+             questionLabelLeading = NSLayoutConstraint(item: questionLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
+             
+              answerTextViewTrailing = NSLayoutConstraint(item: answerTextView, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: -30)
+                 answerTextViewLeading = NSLayoutConstraint(item: answerTextView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: -5)
+
+          indicatorFirstConstraint = NSLayoutConstraint(item: indicatorImageView, attribute: .centerX, relatedBy: .equal, toItem: containerView, attribute: .centerX, multiplier: 1, constant: 0)
+            indicatorSecondConstraint = NSLayoutConstraint(item: indicatorImageView, attribute: .centerY, relatedBy: .equal, toItem: containerView, attribute: .centerY, multiplier: 1, constant: 0)
+
+            case .right:
+                 questionLabelTrailing = NSLayoutConstraint(item: questionLabel, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: 0)
+                 questionLabelLeading = NSLayoutConstraint(item: questionLabel, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 0)
+
+                 answerTextViewTrailing = NSLayoutConstraint(item: answerTextView, attribute: .trailing, relatedBy: .equal, toItem: contentView, attribute: .trailingMargin, multiplier: 1, constant: 0)
+                    answerTextViewLeading = NSLayoutConstraint(item: answerTextView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: 20)
+
+                 
+                indicatorFirstConstraint = NSLayoutConstraint(item: indicatorImageView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: -10)
+                indicatorSecondConstraint = NSLayoutConstraint(item: indicatorImageView, attribute: .top, relatedBy: .equal, toItem: contentView,attribute: .top, multiplier: 1, constant: 5)
+
+        }
+        NSLayoutConstraint.activate([questionLabelTrailing,questionLabelLeading,answerTextViewTrailing,answerTextViewLeading,indicatorFirstConstraint,indicatorSecondConstraint])
+    }
   
   @objc private func didTapQuestion(_ recognizer: UIGestureRecognizer) {
     self.didSelectQuestion?(self)
@@ -518,7 +623,7 @@ class FAQViewCell: UITableViewCell {
         self.answerTextView.alpha = 1
       })
     }
-    answerTextViewBottom.constant = 20
+    answerTextViewBottom.constant = 15
     update(arrow: .up, animated: animated)
   }
   
@@ -558,12 +663,18 @@ enum Arrow: String {
   case down
 }
 
+public enum Position: String {
+  case left
+  case right
+}
+
 enum CellOperation {
   case collapsed
   case expand
   case expanded
   case collapse
 }
+
 
 extension UIImageView {
   func rotate(withAngle angle: CGFloat, animated: Bool) {
