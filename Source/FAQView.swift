@@ -247,11 +247,7 @@ extension FAQView: UITableViewDelegate, UITableViewDataSource {
         if ((height) != nil) {
             return CGFloat(height as! CGFloat)
         } else {
-            #if swift(>=4.2)
-            return UITableView.automaticDimension
-            #else
-            return UITableView.automaticDimension
-            #endif
+            return UITableViewAutomaticDimension
         }
     }
     
@@ -445,17 +441,10 @@ class FAQViewCell: UITableViewCell {
     }()
     
     // MARK: Initialization
-    #if swift(>=4.2)
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         viewSetup()
     }
-    #else
-    override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        viewSetup()
-    }
-    #endif
     
     private func viewSetup() {
         selectionSetup()
@@ -582,7 +571,7 @@ class FAQViewCell: UITableViewCell {
             indicatorFirstConstraint = NSLayoutConstraint(item: indicatorImageView, attribute: .leading, relatedBy: .equal, toItem: contentView, attribute: .leadingMargin, multiplier: 1, constant: -10)
             indicatorSecondConstraint = NSLayoutConstraint(item: indicatorImageView, attribute: .top, relatedBy: .equal, toItem: contentView,attribute: .top, multiplier: 1, constant: 5)
             
-        }        NSLayoutConstraint.activate([questionLabelTrailing,questionLabelLeading,answerTextViewTrailing,answerTextViewLeading,indicatorFirstConstraint,indicatorSecondConstraint])
+        };        NSLayoutConstraint.activate([questionLabelTrailing,questionLabelLeading,answerTextViewTrailing,answerTextViewLeading,indicatorFirstConstraint,indicatorSecondConstraint])
     }
     
     @objc private func didTapQuestion(_ recognizer: UIGestureRecognizer) {

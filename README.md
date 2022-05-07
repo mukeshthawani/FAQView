@@ -25,7 +25,7 @@ and run `pod install`.
 
     use_frameworks!
     target 'Your target name'
-    pod 'FAQView', '~> 0.5.0'
+    pod 'FAQView', '~> 0.7.0'
 
 ## Or Add source
 
@@ -77,8 +77,8 @@ faqView.positionType = .left
 
 ## Requirements
 
-- Swift 4.0
-- Xcode 9.0+
+- Swift 5.0+
+- Xcode 13.0+
 - FAQView 0.4.x is compatible with Swift 3
 - iOS 9.0+
 
