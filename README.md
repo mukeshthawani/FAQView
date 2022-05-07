@@ -7,7 +7,7 @@
 <br>
 <br>
 
-## Screenshouts:
+## Screenshots:
 
 <img
 src='https://github.com/X901/FAQView/blob/master/Demo/graphics/screenshot-Dark.png' width='300' alt='FAQView'><img
